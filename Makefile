@@ -11,7 +11,7 @@ bash: ## bash php
 	@$(DC_CMD) exec php /bin/bash
 
 bash-mysql: ## bash php-db
-	@$(DC_CMD) exec db /bin/bash
+	@$(DC_CMD) exec mysql /bin/bash
 
 bash-nginx: ## bash php-nginx
 	@$(DC_CMD) exec nginx /bin/bash
@@ -45,3 +45,15 @@ build: ## Build php-fpm
 
 logs: ## Show all or c=<name> logs of containers
 	@$(DC_CMD) logs $(c)
+
+DB_CONTAINER_ID := `$(DC_CMD) ps -q mysql`
+
+insert-database-dump: ## Insert database dump from sql by pathname=<path_to_sql_dump>
+		@echo 'Dumping data ...'
+		@cat $(pathname) | docker exec -i $(DB_CONTAINER_ID) /usr/bin/mysql -u root -p$(DB_ROOT_PASS) $(DB_PANEL_NAME)
+		@echo 'Success'
+
+create-database-dump: ## Create database dump to pathname=<path_to_save_directory_and_filename>
+#		@echo 'Creating database dump ...'
+		@docker exec $(DB_CONTAINER_ID) /usr/bin/mysqldump -u root --password=$(MYSQL_ROOT_PASSWORD) $(MYSQL_DATABASE) > $(pathname)
+#		@echo 'Success'
